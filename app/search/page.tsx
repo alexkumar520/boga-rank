@@ -1,34 +1,27 @@
-import { auth } from "@/auth"
-import { createClient } from "@supabase/supabase-js";
-import { Database } from './database.types'
-import { redirect } from 'next/navigation'
+import Search from '@/components/search';
+import { fetchGames } from '../lib/data';
 
+export default async function Page(
+  props: {
+    searchParams?: Promise<{
+      query?: string;
+      page?: string;
+    }>;
+  }
+) {
 
-
-export default async function Page() {
-
-  const session = await auth();
-  
-  const accessToken = session?.supabaseAccessToken;
-  const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      },
-    }
-  )
-
-  const { data, error } = await supabase.from("users").select("*").eq('id', session?.user.name); 
-
-  const displayName = data ? data[0].display_name : 'no_display_name';
+  const searchParams = await props.searchParams;
+  const query = searchParams?.query || '';
+  const currentPage = Number(searchParams?.page) || 1;
+  const game = await fetchGames(query, 1);
+  console.log(game);
   
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+    <div className="grid grid-rows-[auto_auto_1fr] items-center justify-items-center min-h-screen p-8 pb-20 gap-4 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <h1> Search for a game here!</h1>
+      <div>
+        <Search placeholder="Search for a game here..."/>
+      </div>
     </div>
   );
 }

@@ -1,31 +1,15 @@
 import { SignOut } from "@/components/sign-out";
 import { auth } from "@/auth"
-import { createClient } from "@supabase/supabase-js";
-import { Database } from './database.types'
 import { redirect } from 'next/navigation'
 import { DisplayRanks } from "@/components/display-ranks";
 import { SearchGame } from "@/components/redirect-search"
+import { supabaseConnect } from "../lib/supabase";
 
 
 export default async function Page() {
 
-  
-
   const session = await auth();
-  
-  const accessToken = session?.supabaseAccessToken;
-  const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      },
-    }
-  )
-
+  const supabase = await supabaseConnect();
   const { data, error } = await supabase.from("users").select("*").eq('id', session?.user?.id);
 
   if (data && data[0].display_name.length === 0){

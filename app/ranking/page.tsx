@@ -1,10 +1,11 @@
 import { auth } from "@/auth"
-import { createClient } from "@supabase/supabase-js";
 import { Database } from './database.types'
 import { redirect } from 'next/navigation'
 import RankButton from "@/components/rank-button";
 import RankingGame from "@/components/rank-game";
 import { rankGame } from "../lib/actions";
+import { supabaseConnect } from "../lib/supabase";
+
 
 
 
@@ -20,18 +21,7 @@ export default async function Page(props: {
   const id = searchParams?.id || '';
   const game = searchParams?.game || '';
 
-  const accessToken = session?.supabaseAccessToken;
-  const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      },
-    }
-  )
+  const supabase = await supabaseConnect();
 
   const result = await supabase.from("user_ranks").select("games").eq('id', session?.user?.id);
   let games_list = result.data![0]["games"]; //pass this to binarysearch component if its not null. 

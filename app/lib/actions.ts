@@ -1,9 +1,9 @@
 'use server';
 import { auth } from "@/auth"
-import { createClient } from "@supabase/supabase-js";
 import { Database } from './database.types'
 import { redirect } from 'next/navigation';
-import { revalidatePath } from "next/cache";
+import { supabaseConnect } from "../lib/supabase";
+
 
 
  
@@ -12,18 +12,7 @@ export async function updateDisplayName(id: string, formData: FormData) {
   const session = await auth();
   
   // Sample usage of querying db
-  const accessToken = session?.supabaseAccessToken;
-  const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      },
-    }
-  )
+  const supabase = await supabaseConnect();
 
   const displayName = formData.get('display_name');
 
@@ -37,18 +26,7 @@ export async function rankGame(game_list: Database.user_ranks.games) {
   const session = await auth();
   
   // Sample usage of querying db
-  const accessToken = session?.supabaseAccessToken;
-  const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      },
-    }
-  )
+  const supabase = await supabaseConnect();
   
   const {data, error} = await supabase.from("user_ranks").update({games: game_list}).eq('id', session?.user?.id);
 }

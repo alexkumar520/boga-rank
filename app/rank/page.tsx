@@ -1,27 +1,14 @@
 import { auth } from "@/auth"
 import { createClient } from "@supabase/supabase-js";
-import { Database } from './database.types'
-import { redirect } from 'next/navigation'
+import { Database } from '@/database.types'
+import { supabaseConnect } from "../lib/supabase";
 import RankButton from "@/components/rank-button";
-
-
 
 export default async function Page() {
 
   const session = await auth();
   
-  const accessToken = session?.supabaseAccessToken;
-  const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      global: {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      },
-    }
-  )
+  const supabase = await supabaseConnect();
 
   const { data, error } = await supabase.from("games").select("name, id").limit(10).order("id", {ascending: true});
 

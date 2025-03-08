@@ -1,22 +1,11 @@
 import { auth } from "@/auth"
-import { createClient } from "@supabase/supabase-js";
+import { supabaseConnect } from "@/app/lib/supabase";
 import { Database } from './database.types'
 
 
 export async function DisplayRanks() {
     const session = await auth();
-    const accessToken = session?.supabaseAccessToken;
-    const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-        global: {
-            headers: {
-            Authorization: `Bearer ${accessToken}`,
-            },
-        },
-        }
-    )
+    const supabase = await supabaseConnect();
 
     const { data, error } = await supabase.from("user_ranks").select("games").eq('id', session?.user?.id);
 
